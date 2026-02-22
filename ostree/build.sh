@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Slackware build script for flatpak
+# Slackware build script for ostree
 
-# Copyright 2020-2025 Andrew Payne <phalange@komputermatrix.com>
-# Copyright 2017, 2018, 2019 Vincent Batts <vbatts@hashbangbash.com>
+# Copyright 2019-2025 Andrew Payne <phalange@komputermatrix.com>
+# Copyright 2017 Vincent Batts <vbatts@hashbangbash.com>
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -23,13 +23,11 @@
 #  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 cd $(dirname $0) ; CWD=$(pwd)
 
-PRGNAM=flatpak
-VERSION=${VERSION:-1.16.3}
-BUILD=${BUILD:-1}
-TAG=${TAG:-_DBs}
-PKGTYPE=${PKGTYPE:-tgz}
+PRGNAM=ostree
+VERSION=${VERSION:-2025.7}
 
 if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
@@ -39,54 +37,52 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-# If the variable PRINT_PACKAGE_NAME is set, then this script will report what
-# the name of the created package would be, and then exit. This information
 # could be useful to other scripts.
 if [ ! -z "${PRINT_PACKAGE_NAME}" ]; then
   echo "$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.$PKGTYPE"
   exit 0
 fi
 
-TMP=${TMP:-/tmp/DBs}
-PKG=$TMP/package-$PRGNAM
-OUTPUT=${OUTPUT:-/tmp}
-
-# Abort build if architecture is not 64-bit.
-if [ "$ARCH" != "x86_64" ]; then
-  echo "$ARCH is not supported."
-  exit 1
+if [ "$ARCH" = "i586" ]; then
+  SLKCFLAGS="-O2 -march=i586 -mtune=i686"
+  LIBDIRSUFFIX=""
+elif [ "$ARCH" = "i686" ]; then
+  SLKCFLAGS="-O2 -march=i686 -mtune=i686"
+  LIBDIRSUFFIX=""
+elif [ "$ARCH" = "x86_64" ]; then
+  SLKCFLAGS="-O2 -fPIC"
+  LIBDIRSUFFIX=""
+elif [ "$ARCH" = "aarch64" ]; then
+  SLKCFLAGS="-O2 -fPIC"
+  LIBDIRSUFFIX=""
+else
+  SLKCFLAGS="-O2"
+  LIBDIRSUFFIX=""
 fi
 
 set -e
 
-rm -rf $PRGNAM-$VERSION
-tar xvf $CWD/$PRGNAM-$VERSION.tar.xz
-cd $PRGNAM-$VERSION
+rm -rf lib${PRGNAM}-$VERSION
+if ! [[ -f lib${PRGNAM}-$VERSION.tar.xz ]]; then
+	wget -c https://github.com/ostreedev/ostree/releases/download/v${VERSION}/lib$PRGNAM-$VERSION.tar.xz
+fi
+tar xvf $CWD/lib${PRGNAM}-$VERSION.tar.xz
+cd lib${PRGNAM}-$VERSION
 
+./configure \
+  --prefix=/usr \
+  --libdir=/usr/lib \
+  --sysconfdir=/etc \
+  --localstatedir=/var \
+  --mandir=/usr/man \
+  --docdir=/usr/share/doc/$PRGNAM-$VERSION \
+  --build=$ARCH-slackware-linux
 
-mkdir build
-cd build
-  meson setup .. \
-    --bindir=/usr/bin \
-    --datadir=/usr/share \
-    --includedir=/usr/include \
-    --infodir=/usr/info \
-    --libdir=/usr/lib \
-    --libexecdir=/usr/libexec \
-    --localstatedir=/var \
-    --mandir=/usr/man \
-    --prefix=/usr \
-    --sbindir=/usr/sbin \
-    --sysconfdir=/etc \
-    -Ddocdir=/usr/share/doc/$PRGNAM-$VERSION \
-    -Dstrip=true
-  "${NINJA:=ninja}" -j$(nproc)
-  DESTDIR=/ sudo $NINJA install
-cd ..
-
-sudo chmod +x /etc/profile.d/flatpak.sh
+make
+sudo make install DESTDIR=/
 
 sudo mkdir -p /usr/share/doc/$PRGNAM-$VERSION
 sudo cp -a \
-  COPYING NEWS \
-  /usr/share/doc/$PRGNAM-$VERSION
+   COPYING README.md TODO \
+   /usr/share/doc/$PRGNAM-$VERSION
+

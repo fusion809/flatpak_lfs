@@ -28,9 +28,6 @@ cd $(dirname $0) ; CWD=$(pwd)
 
 PRGNAM=gcab
 VERSION=${VERSION:-1.6}
-BUILD=${BUILD:-1}
-TAG=${TAG:-_DBs}
-PKGTYPE=${PKGTYPE:-tgz}
 
 if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
@@ -53,14 +50,17 @@ elif [ "$ARCH" = "i686" ]; then
   LIBDIRSUFFIX=""
 elif [ "$ARCH" = "x86_64" ]; then
   SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
+  LIBDIRSUFFIX=""
 else
   SLKCFLAGS="-O2"
   LIBDIRSUFFIX=""
 fi
 
 set -e
-
+rm -rf $PRGNAM-$VERSION
+if ! [[ -f $PRGNAM-$VERSION.tar.xz ]]; then
+	wget -c https://download.gnome.org/sources/gcab/$VERSION/$PRGNAM-$VERSION.tar.xz
+fi
 tar xf $CWD/$PRGNAM-$VERSION.tar.xz
 cd $PRGNAM-$VERSION
 
