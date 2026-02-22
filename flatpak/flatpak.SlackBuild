@@ -78,7 +78,7 @@ cd build
     --prefix=/usr \
     --sbindir=/usr/sbin \
     --sysconfdir=/etc \
-    -Ddocdir=/usr/doc/$PRGNAM-$VERSION \
+    -Ddocdir=/usr/share/doc/$PRGNAM-$VERSION \
     -Dstrip=true
   "${NINJA:=ninja}" -j$(nproc)
   DESTDIR=/ sudo $NINJA install
@@ -86,7 +86,7 @@ cd ..
 
 sudo chmod +x /etc/profile.d/flatpak.sh
 
-sudo mkdir -p /usr/doc/$PRGNAM-$VERSION
+sudo mkdir -p /usr/share/doc/$PRGNAM-$VERSION
 sudo cp -a \
   COPYING NEWS \
-  /usr/doc/$PRGNAM-$VERSION
+  /usr/share/doc/$PRGNAM-$VERSION

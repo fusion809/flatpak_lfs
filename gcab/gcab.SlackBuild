@@ -81,7 +81,7 @@ cd ..
 
 sudo rm -f /usr/lib*/*.la
 
-sudo mkdir -p /usr/doc/$PRGNAM-$VERSION
+sudo mkdir -p /usr/share/doc/$PRGNAM-$VERSION
 sudo cp -a \
    COPYING NEWS README.md RELEASE \
-   /usr/doc/$PRGNAM-$VERSION
+   /usr/share/doc/$PRGNAM-$VERSION
